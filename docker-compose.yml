@@ -1,0 +1,61 @@
+services:
+  # Development service
+  app-dev:
+    container_name: nestjs-app-dev
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    env_file:
+      - .env.development
+    ports:
+      - '3000:3000'
+    volumes:
+      - .:/app
+      - /app/node_modules
+    depends_on:
+      - db
+    profiles:
+      - dev
+
+  # Prodution service
+  app-prod:
+    container_name: nestjs-app-prod
+    build:
+      context: .
+      dockerfile: Dockerfile.prod
+    env_file:
+      - .env.production
+    ports:
+      - '8080:3000'
+    depends_on:
+      - db
+    profiles:
+      - prod
+
+  # Database service (PostgreSQL)
+  db:
+    image: postgres:17-alpine
+    container_name: nestjs-db
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=postgres
+    ports:
+      - '5432:5432'
+    volumes:
+      - db-data:/var/lib/postgresql/data
+
+  # pgAdmin service (PostgreSQL)
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: nestjs-pgadmin4
+    environment:
+      - PGADMIN_DEFAULT_EMAIL=admin@example.com
+      - PGADMIN_DEFAULT_PASSWORD=admin
+    ports:
+      - '5050:80'
+    depends_on:
+      - db
+
+volumes:
+  db-data:
